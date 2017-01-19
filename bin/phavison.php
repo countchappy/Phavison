@@ -13,7 +13,7 @@
 	$error_code = 0;
 	$error_message = "";
 	$call_data = null;
-	$para = null;
+	$parameters = null;
 	$function = null;
 
 	// Define and populate our phavison settings.
@@ -70,7 +70,7 @@
 			$function = $_POST['call_to'];
 			
 			if (isset($_POST['para'])) {
-				$para = $_POST['para'];
+				$parameters = $_POST['para'];
 			}
 			
 			run_function();
@@ -81,7 +81,7 @@
 			$function = $_GET['call_to'];
 			
 			if(isset($_GET['para'])){
-				$para = $_GET['para'];
+				$parameters = $_GET['para'];
 			}
 			
 			run_function();
@@ -95,11 +95,11 @@
 	function run_function(){
 		
 		// We first need to bring in our dependant globals.
-		global $function, $para, $call_data, $error_code, $error_message;
+		global $function, $parameters, $call_data, $error_code, $error_message;
 		
 		// Here we check if the function exists then actually call the function.
 		if(function_exists($function)){
-			$call_data = $function(json_decode(base64_decode($para), true));
+			$call_data = $function(json_decode($parameters, true));
 		} else {
 			$error_code = "R-Err_2";
 			$error_message = "A call to the function '$function' was made. That function does not exist or is not within a php file under the home directory located at '".$settings_php_dir."'";
@@ -110,6 +110,6 @@
 	$execution_time = (microtime(true) - $time_start) * 1000;
 	
 	// Run the function and return the json object to jquery.phavison(.min).js
-	$return_data = populate_data($error_code, $error_message, $function, $para, $execution_time, $call_data, $settings_phavison_secure);
+	$return_data = populate_data($error_code, $error_message, $function, $parameters, $execution_time, $call_data, $settings_phavison_secure);
 	echo json_encode($return_data);
 ?>
