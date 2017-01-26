@@ -1,13 +1,17 @@
 <?php
 	/* --- This function simply populates our return data array and returns it --- */
-	function populate_data($erc, $erm, $fc, $fp, $ext, $cd, $sm){
-		if($sm){
+	function populate_data($erc, $erm, $fc, $fp, $ext, $cd, $silent, $secure){
+		if($silent){
+			'data' => $cd
+		}
+		if($secure){
 			$rd = array(
 				'err_code' => $erc,
 				'err_msg' => $erm,
 				'data' => $cd
 			);
-		} else {
+		}
+		if($silent == false && $secure == false){
 			$rd = array(
 				'err_code'=> $erc,
 				'err_msg'=> $erm,

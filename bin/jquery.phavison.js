@@ -15,7 +15,7 @@
 		var settings = $.extend({
 			/* This setting (url) is where the phavison file is located! relative to the dependant page */
 			url: 'bin/phavison.php',
-			func_vars: false,
+			variables: false,
 			async_enabled: true,
 			async_function: 'phavisonCallback',
 			debug_error: false,
@@ -35,8 +35,8 @@
 			
 			// Populate the function's parameters if they are defined.
 			var data_send_array = null;
-			if (settings.func_vars !== false) {
-				data_send_array = JSON.stringify(settings.func_vars);
+			if (settings.variables !== false) {
+				data_send_array = JSON.stringify(settings.variables);
 			}
 			
 			// Populate our data that will be sent to Phavison.php
@@ -81,7 +81,7 @@
 					if (time_total < 0) {
 						time_total = time_total + 1;
 					}
-					alert("PHAVISON-ERROR-" + json_object.err_code + ": " + json_object.err_msg + "\nINFO:\nFunction Called: " + json_object.function_called + "\nParameters Defined: " + json_object.func_vars + "\nPHP Execution Time: " + json_object.exec_time + " Milliseconds\nTotal Execution Time: " + time_total + " Milliseconds");
+					alert("PHAVISON-ERROR-" + json_object.err_code + ": " + json_object.err_msg + "\nINFO:\nFunction Called: " + json_object.function_called + "\nParameters Defined: " + json_object.variables + "\nPHP Execution Time: " + json_object.exec_time + " Milliseconds\nTotal Execution Time: " + time_total + " Milliseconds");
 				}
 				
 				// This will start the async call function (If defined).
