@@ -2,7 +2,9 @@
 	/* --- This function simply populates our return data array and returns it --- */
 	function populate_data($erc, $erm, $fc, $fp, $ext, $cd, $silent, $secure){
 		if($silent){
-			'data' => $cd
+			$rd = array(
+				'data' => $cd
+			);
 		}
 		if($secure){
 			$rd = array(

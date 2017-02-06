@@ -70,8 +70,8 @@
 			// Get the name of the function from the post data
 			$function = $_POST['call_to'];
 			
-			if (isset($_POST['para'])) {
-				$parameters = $_POST['para'];
+			if (isset($_POST['parameters'])) {
+				$parameters = $_POST['parameters'];
 			}
 			
 			run_function();
@@ -81,8 +81,8 @@
 				// Get the name of the function from the get data
 				$function = $_GET['call_to'];
 				
-				if(isset($_GET['para'])){
-					$parameters = $_GET['para'];
+				if(isset($_GET['parameters'])){
+					$parameters = $_GET['parameters'];
 				}
 				
 				run_function();
@@ -100,11 +100,11 @@
 	function run_function(){
 		
 		// We first need to bring in our dependant globals.
-		global $function, $parameters, $call_data, $error_code, $error_message;
+		global $function, $parameters, $call_data, $error_code, $error_message, $settings_php_dir;
 		
 		// Here we check if the function exists then actually call the function.
 		if(function_exists($function)){
-			$call_data = $function(json_decode($parameters, true));
+			$call_data = $function(json_decode(base64_decode($parameters), true));
 		} else {
 			$error_code = "R-Err_2";
 			$error_message = "A call to the function '$function' was made. That function does not exist or is not within a php file under the home directory located at '".$settings_php_dir."'";
