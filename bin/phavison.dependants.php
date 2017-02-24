@@ -1,28 +1,29 @@
 <?php
 	/* --- This function simply populates our return data array and returns it --- */
-	function populate_data($erc, $erm, $fc, $fp, $ext, $cd, $silent, $secure){
+	function populate_data($errorCode, $errorMessage, $functionCalled, $functionParameters, $executionTime, $returnData, $silent, $secure){
+		$returnArray = array();
 		if($silent){
-			$rd = array(
-				'data' => $cd
+			$returnArray = array(
+				'data' => $returnData
 			);
 		}
 		if($secure){
-			$rd = array(
-				'err_code' => $erc,
-				'err_msg' => $erm,
-				'data' => $cd
+			$returnArray = array(
+				'err_code' => $errorCode,
+				'err_msg' => $errorMessage,
+				'data' => $returnData
 			);
 		}
 		if($silent == false && $secure == false){
-			$rd = array(
-				'err_code'=> $erc,
-				'err_msg'=> $erm,
-				'function_called'=> $fc,
-				'function_parameters'=> $fp,
-				'exec_time'=> $ext,
-				'data'=> $cd
+			$returnArray = array(
+				'err_code'=> $errorCode,
+				'err_msg'=> $errorMessage,
+				'function_called'=> $functionCalled,
+				'function_parameters'=> $functionParameters,
+				'exec_time'=> $executionTime,
+				'data'=> $returnData
 			);
 		}
-		return $rd;
+		return $returnArray;
 	}
 ?>
