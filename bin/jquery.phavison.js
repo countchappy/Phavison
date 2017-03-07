@@ -1,13 +1,13 @@
 (function($) {
 	
 	$.phavison = function(call, options) {
+		// Get execution time.
+		var time_start = new Date().getMilliseconds();
+		
 		// If options is undefined make an empty object for it
 		if (options === undefined) {
 			options = {};
 		}
-		
-		// Get execution time.
-		var time_start = new Date().getMilliseconds();
 
 		// Defining our variables.
 		var return_data;
@@ -87,7 +87,9 @@
 				
 				// This will start the async call function (If defined).
 				if(settings.async_enabled === true){
-					window[settings.async_function](json_object);
+					if(typeof(window[settings.async_function])==="function"){
+						window[settings.async_function](json_object);
+					}
 				}
 				
 				
@@ -110,6 +112,12 @@
 				error: "No PHP function was given. Please try again!"
 			};
 		}
+		var time_end = new Date().getMilliseconds();
+		var time_total = time_end - time_start;
+		if (time_total < 0) {
+			time_total = time_total + 1;
+		}
+		alert("Total Execution Time:\n" + time_total + " Milliseconds");
 		return return_data;
 	};
 }(jQuery));

@@ -20,12 +20,17 @@
 	$ini = new INI("cfg/config.ini");
 	
 	$settingsPhavisonEnabled = $ini->getSetting('SETTINGS', 'ENABLE');
+	if($settingsPhavisonEnabled){
+		$settingsPhavisonGetEnabled = $ini->getSetting('SETTINGS', 'ENABLE_GET');
+		$settingsPhpDir = $ini->getSetting('FILES', 'INCLUDE_DIR');
+		$settingsNonIncludeDir = $ini->getSetting('FILES', 'NON_INCLUDE_DIR');
+		$settingsDirPerm = $ini->getSetting('FILES', 'DIR_PERM');
+		$settingsWhitelistFunctions = $ini->getSetting('FUNCTIONS', 'WHITELIST_ENFORCED');
+		$settingsWhitelistSetup = $ini->getSetting('FUNCTIONS', 'WHITELIST_SETUP');
+		$settingsWhitelistFile = $ini->getSetting('FUNCTIONS', 'WHITELIST_FILE');
+	}
 	$settingsPhavisonSecure = $ini->getSetting('SETTINGS', 'ENABLE_SECURE_MODE');
-	$settingsPhavisonGetEnabled = $ini->getSetting('SETTINGS', 'ENABLE_GET');
 	$settingsPhavisonSilentMode = $ini->getSetting('SETTINGS', 'ENABLE_SILENT_MODE');
-	$settingsPhpDir = $ini->getSetting('FILES', 'INCLUDE_DIR');
-	$settingsNonIncludeDir = $ini->getSetting('FILES', 'NON_INCLUDE_DIR');
-	$settingsDirPerm = $ini->getSetting('FILES', 'DIR_PERM');
 	
 	// Check if the user has enabled this Application to run.
 	if(!$settingsPhavisonEnabled){
@@ -34,34 +39,47 @@
 		$callData = null;
 	}
 	
-	/* Check if the Phavison's include and non include PHP directories exists, if not, make the directories.
-	-------- START FOLDER PROCESSING -------- */
-	if(!file_exists($settingsPhpDir)){
-		if(!mkdir($settingsPhpDir, $settingsPhpDir_perm, true)){
-			$errorMessage = "one of your PHP directories has failed to be created.";
-			$errorCode = "I-Err_2";
-			$callData = null;
-			$settingsPhavisonEnabled = false;
-		}
-	}
-	if(!file_exists($settingsNonIncludeDir)){
-		if(!mkdir($settingsNonIncludeDir, $settingsDirPerm, true)) {
-			$errorMessage = "one of your PHP directories has failed to be created.";
-			$errorCode = "I-Err_2";
-			$callData = null;
-			$settingsPhavisonEnabled = false;
-		}
-	}
-	/* -------- END FOLDER PROCESSING -------- */
-
-	
-	/* -------- Include all of the php files specified in the $settingsPhpDir directory -------- */
-	foreach (glob($settingsPhpDir . "*.php") as $filename) { 
-		include_once($filename);
-	}
-	
 	// Check if enabled and continue!
 	if($settingsPhavisonEnabled){
+		/* Check if the Phavison's include and non include PHP directories exists, if not, make the directories.
+		-------- START FOLDER PROCESSING -------- */
+		if(!file_exists($settingsPhpDir)){
+			if(!mkdir($settingsPhpDir, $settingsPhpDir_perm, true)){
+				$errorMessage = "one of your PHP directories has failed to be created.";
+				$errorCode = "I-Err_2";
+				$callData = null;
+				$settingsPhavisonEnabled = false;
+			}
+		}
+		if(!file_exists($settingsNonIncludeDir)){
+			if(!mkdir($settingsNonIncludeDir, $settingsDirPerm, true)) {
+				$errorMessage = "one of your PHP directories has failed to be created.";
+				$errorCode = "I-Err_2";
+				$callData = null;
+				$settingsPhavisonEnabled = false;
+			}
+		}
+		/* -------- END FOLDER PROCESSING -------- */
+		
+		/* -------- Include all of the php files specified in the $settingsPhpDir directory -------- */
+		if($settingsWhitelistSetup){
+			$functionFinder = '/function[\s\n]+(\S+)[\s\n]*\(/';
+			$functionArray = array();
+			$mainFunctionArray = array();
+			$arrayIndex = 0;
+			foreach (glob($settingsPhpDir . "*.php") as $filename) {
+				$fileContents = file_get_contents($filename);
+				preg_match_all( $functionFinder , $fileContents , $functionArray );
+				if(count($functionArray) > 1){
+					$mainFunctionArray[$arrayIndex] = $functionArray[1];
+					$arrayIndex = $arrayIndex + 1;
+				}
+			}
+			$ini->writeFunctions($mainFunctionArray, "cfg/" . $settingsWhitelistFile);
+		}
+		foreach (glob($settingsPhpDir . "*.php") as $filename) { 
+			include_once($filename);
+		}
 		
 		// Make sure that the post (or get if enabled) method of 'call_to' are defined.
 		
@@ -100,14 +118,27 @@
 	function run_function(){
 		
 		// We first need to bring in our dependant globals.
-		global $function, $parameters, $callData, $errorCode, $errorMessage, $settingsPhpDir;
+		global $function, $parameters, $callData, $errorCode, $errorMessage, $settingsPhpDir, $settingsWhitelistFile, $settingsWhitelistFunctions;
 		
 		// Here we check if the function exists then actually call the function.
-		if(function_exists($function)){
-			$callData = $function(json_decode(base64_decode($parameters), true));
-		} else {
-			$errorCode = "R-Err_2";
-			$errorMessage = "A call to the function '$function' was made. That function does not exist or is not within a php file under the home directory located at '".$settingsPhpDir."'";
+		$fini = new INI("cfg/functions.ini");
+		$isWhitelisted = $fini->getSetting("FUNCTIONS", $function);
+		
+		if($settingsWhitelistFunctions){
+			if($isWhitelisted && function_exists($function)){
+				$callData = $function(json_decode(base64_decode($parameters), true));
+			} else {
+				$errorCode = "R-Err_3";
+				$errorMessage = "A call to the function '$function' was made. That function is not callable as specified by the whitelist, please update the whitelist and try again";
+			}
+		}
+		if(!$settingsWhitelistFunctions){
+			if(function_exists($function)){
+				$callData = $function(json_decode(base64_decode($parameters), true));
+			} else {
+				$errorCode = "R-Err_2";
+				$errorMessage = "A call to the function '$function' was made. That function does not exist or is not within a php file under the home directory located at '".$settingsPhpDir."'";
+			}
 		}
 	}
 	
