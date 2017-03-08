@@ -53,18 +53,18 @@
 			return $success; 
 		}
 		private function safefilerewrite($dataToSave) {
-			if ($fp = fopen($this->fileLocation, 'w')){
+			if ($openFile = fopen($this->fileLocation, 'w')){
 				$startTime = microtime(TRUE);
 				do {
-					$canWrite = flock($fp, LOCK_EX);
+					$canWrite = flock($openFile, LOCK_EX);
 					if(!$canWrite) usleep(round(rand(0, 100)*1000));
 				} while ((!$canWrite) and ((microtime(TRUE) - $startTime) < 5));
 
 				if ($canWrite) {
-					fwrite($fp, $dataToSave);
-					flock($fp, LOCK_UN);
+					fwrite($openFile, $dataToSave);
+					flock($openFile, LOCK_UN);
 				}
-				fclose($fp);
+				fclose($openFile);
 			}
 		}
 	}

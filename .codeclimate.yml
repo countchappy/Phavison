@@ -12,12 +12,16 @@ engines:
     checks:
       no-alert:
         enabled: false
+    exclude_fingerprints:
+    - f954c2350247f7275f3cc5d152bc8625
   fixme:
     enabled: true
   phpmd:
     enabled: true
     checks:
       CleanCode/ElseExpression:
+        enabled: false
+    Naming/LongVariable:
         enabled: false
 ratings:
   paths:

@@ -75,7 +75,8 @@
 					$arrayIndex = $arrayIndex + 1;
 				}
 			}
-			$ini->writeFunctions($mainFunctionArray, "cfg/" . $settingsWhitelistFile);
+			$ini->setFileLocation("cfg/" . $settingsWhitelistFile);
+			$ini->writeFunctions($mainFunctionArray);
 		}
 		foreach (glob($settingsPhpDir . "*.php") as $filename) { 
 			include_once($filename);
@@ -121,7 +122,7 @@
 		global $function, $parameters, $callData, $errorCode, $errorMessage, $settingsPhpDir, $settingsWhitelistFile, $settingsWhitelistFunctions;
 		
 		// Here we check if the function exists then actually call the function.
-		$fini = new INI("cfg/functions.ini");
+		$fini = new INI("cfg/" . $settingsWhitelistFile);
 		$isWhitelisted = $fini->getSetting("FUNCTIONS", $function);
 		
 		if($settingsWhitelistFunctions){
