@@ -21,7 +21,7 @@ engines:
     checks:
       CleanCode/ElseExpression:
         enabled: false
-    Naming/LongVariable:
+      Naming/LongVariable:
         enabled: false
 ratings:
   paths:

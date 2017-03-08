@@ -39,10 +39,10 @@
 			$success = true;
 			$iniArray = array();
 			$iniArray[] = "[FUNCTIONS]";
-			foreach($array as $key => $value){
+			foreach($array as $value){
 				if(is_array($value))
 				{
-					foreach($value as $subKey => $subValue){
+					foreach($value as $subValue){
 						$iniArray[] = (is_numeric($subValue) ? $subValue : ''.$subValue.''). " = false";
 					}
 				}
