@@ -112,12 +112,6 @@
 				error: "No PHP function was given. Please try again!"
 			};
 		}
-		var time_end = new Date().getMilliseconds();
-		var time_total = time_end - time_start;
-		if (time_total < 0) {
-			time_total = time_total + 1;
-		}
-		alert("Total Execution Time:\n" + time_total + " Milliseconds");
 		return return_data;
 	};
 }(jQuery));
