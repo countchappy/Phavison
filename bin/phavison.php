@@ -62,21 +62,35 @@
 		/* -------- END FOLDER PROCESSING -------- */
 		
 		/* -------- Include all of the php files specified in the $settingsPhpDir directory -------- */
+		
+		// - If the setup flag is marked. Perform setup.
 		if($settingsWhitelistSetup){
-			$functionFinder = '/function[\s\n]+(\S+)[\s\n]*\(/';
-			$functionArray = array();
+			
+			// Define our regular expression to search for functions in the PHP FILES
+			$functionRegex = '/function[\s\n]+(\S+)[\s\n]*\(/';
+			$rawDataArray = array();
 			$mainFunctionArray = array();
+			$iniDataArray = array();
 			$arrayIndex = 0;
+			
+			// For every PHP file in the include directory, check for functions
 			foreach (glob($settingsPhpDir . "*.php") as $filename) {
 				$fileContents = file_get_contents($filename);
-				preg_match_all( $functionFinder , $fileContents , $functionArray );
-				if(count($functionArray) > 1){
-					$mainFunctionArray[$arrayIndex] = $functionArray[1];
-					$arrayIndex = $arrayIndex + 1;
+				
+				// Flag all matches and push them to the $rawDataArray variable
+				preg_match_all( $functionRegex , $fileContents , $rawDataArray );
+				
+				// If the $rawDataArray is filled (meaning function names were found) continue the process
+				if(count($rawDataArray) > 1){
+					$mainFunctionArray = $rawDataArray[1];
+					
+					// For each function name, pass it to the INI array
+					foreach ($mainFunctionArray as $functionName) {
+						$iniDataArray[strtoupper(basename($filename, ".php"))][$functionName] = "false";
+					}
 				}
 			}
-			$ini->setFileLocation("cfg/" . $settingsWhitelistFile);
-			$ini->writeFunctions($mainFunctionArray);
+			$ini->writeIniFile($iniDataArray, "cfg/" . $settingsWhitelistFile, true);
 		}
 		foreach (glob($settingsPhpDir . "*.php") as $filename) { 
 			include_once($filename);
@@ -123,7 +137,7 @@
 		
 		// Here we check if the function exists then actually call the function.
 		$fini = new INI("cfg/" . $settingsWhitelistFile);
-		$isWhitelisted = $fini->getSetting("FUNCTIONS", $function);
+		$isWhitelisted = $fini->getSetting(null, $function, false);
 		
 		if($settingsWhitelistFunctions){
 			if($isWhitelisted && function_exists($function)){

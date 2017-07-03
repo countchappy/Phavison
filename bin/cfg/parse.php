@@ -15,17 +15,21 @@
 			return $this->fileLocation;
 		}
 		
-		public function getSetting($set, $item) {
+		public function getSetting($set = null, $item = null, $processSections = true) {
 			$returnVar = false;
 			try {	
 				$configArray = array();
 				
 				if (is_file($this->fileLocation)) {
-					$configArray = parse_ini_file($this->fileLocation, true);
-					if (isset($configArray[$set][$item])) {
-						$returnVar = $configArray[$set][$item];
+					$configArray = parse_ini_file($this->fileLocation, $processSections);
+					if($processSections){
+						if (isset($configArray[$set][$item])) {
+							$returnVar = $configArray[$set][$item];
+						}
 					} else {
-						$returnVar = false;
+						if (isset($configArray[$item])) {
+							$returnVar = $configArray[$item];
+						}
 					}
 				}
 			
@@ -35,37 +39,50 @@
 			
 			return $returnVar;
 		}
-		public function writeFunctions($array) { 
-			$success = true;
-			$iniArray = array();
-			$iniArray[] = "[FUNCTIONS]";
-			foreach($array as $value){
-				if(is_array($value))
-				{
-					foreach($value as $subValue){
-						$iniArray[] = (is_numeric($subValue) ? $subValue : ''.$subValue.''). " = false";
-					}
-				}
-				else $iniArray[] = (is_numeric($subValue) ? $subValue : ''.$subValue.''). " = false";
-			}
-			$this->safefilerewrite(implode("\r\n", $iniArray));
-	 
-			return $success; 
-		}
-		private function safefilerewrite($dataToSave) {
-			if ($openFile = fopen($this->fileLocation, 'w')){
-				$startTime = microtime(TRUE);
-				do {
-					$canWrite = flock($openFile, LOCK_EX);
-					if(!$canWrite) usleep(round(rand(0, 100)*1000));
-				} while ((!$canWrite) and ((microtime(TRUE) - $startTime) < 5));
+		
+		function writeIniFile($iniArray, $path = "cfg/functions.ini", $hasSections=FALSE) { 
+			$this->fileLocation = $path;
+			$content = ""; 
+			if ($hasSections) { 
+				foreach ($iniArray as $key=>$elem) { 
+					$content .= "[".$key."]\n"; 
+					foreach ($elem as $key2=>$elem2) { 
+						if(is_array($elem2)) 
+						{ 
+							for($i=0;$i<count($elem2);$i++) 
+							{ 
+								$content .= $key2."[] = ".$elem2[$i]."\n"; 
+							} 
+						} 
+						else if($elem2=="") $content .= $key2." = \n"; 
+						else $content .= $key2." = ".$elem2."\n"; 
+					} 
+				} 
+			} 
+			else { 
+				foreach ($iniArray as $key=>$elem) { 
+					if(is_array($elem)) 
+					{ 
+						for($i=0;$i<count($elem);$i++) 
+						{ 
+							$content .= $key."[] = ".$elem[$i]."\n"; 
+						} 
+					} 
+					else if($elem=="") $content .= $key." = \n"; 
+					else $content .= $key." = ".$elem."\n"; 
+				} 
+			} 
 
-				if ($canWrite) {
-					fwrite($openFile, $dataToSave);
-					flock($openFile, LOCK_UN);
-				}
-				fclose($openFile);
+			
+			
+			if (!$handle = fopen($this->fileLocation, 'w')) { 
+				return false; 
 			}
+
+			$success = fwrite($handle, $content);
+			fclose($handle); 
+
+			return $success; 
 		}
 	}
 ?>
