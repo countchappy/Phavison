@@ -1,6 +1,6 @@
 (function($) {
 	
-	$.phavison = function(call, options) {
+	$.phavison = function(fileToBeCalled, functionToBeCalled, options) {
 		// Get execution time.
 		var time_start = new Date().getMilliseconds();
 		
@@ -26,7 +26,7 @@
 		}, options);
 		
 		// Here we check if the function to be called was defined or not!
-		if (call !== null) {
+		if (functionToBeCalled !== null && fileToBeCalled !== null) {
 			
 			// Set the mode of data transfer.
 			var method_type = "POST";
@@ -42,7 +42,8 @@
 			
 			// Populate our data that will be sent to Phavison.php
 			var data_send = {
-				call_to: call,
+				functionToCall: functionToBeCalled,
+				fileToCall: fileToBeCalled,
 				parameters: data_send_array
 			};
 
