@@ -1,10 +1,4 @@
 <?php
-	// Get current microtime to calculate execution time
-	$time_start = microtime(true);
-	
-	// Include the functions needed to run Phavison.
-	include_once('phavison.dependants.php');
-
 	// Define key variables for the phavison application.
 	$returnData = array();
 	$errorCode = 0;
@@ -153,9 +147,34 @@
 		}
 	}
 	
-	// Calculate script running time (for debugging if needed).
-	$executionTime = (microtime(true) - $time_start) * 1000;
+	function populateReturnData($errorCode, $errorMessage, $fileCalled, $functionCalled, $functionParameters, $returnData, $silent, $secure){
+		$returnArray = array();
+		if($silent){
+			$returnArray = array(
+				'dataReturned' => $returnData
+			);
+		}
+		if($secure){
+			$returnArray = array(
+				'errorCode' => $errorCode,
+				'errorMessage' => $errorMessage,
+				'dataReturned' => $returnData
+			);
+		}
+		if($silent == false && $secure == false){
+			$returnArray = array(
+				'errorCode'=> $errorCode,
+				'errorMessage'=> $errorMessage,
+				'fileCalled'=>$fileCalled,
+				'functionCalled'=> $functionCalled,
+				'variables'=> $functionParameters,
+				'dataReturned'=> $returnData
+			);
+		}
+		return $returnArray;
+	}
+	
 	// Run the function and return the json object to jquery.phavison(.min).js
-	$returnData = populate_data($errorCode, $errorMessage, $fileToCall, $functionToCall, $parameters, $executionTime, $callData, $configuration['GLOBALS']['SILENT_MODE'], $configuration['GLOBALS']['SECURE_MODE']);
+	$returnData = populateReturnData($errorCode, $errorMessage, $fileToCall, $functionToCall, $parameters, $callData, $configuration['GLOBALS']['SILENT_MODE'], $configuration['GLOBALS']['SECURE_MODE']);
 	echo json_encode($returnData);
 ?>
